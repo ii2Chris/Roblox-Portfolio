@@ -1,5 +1,5 @@
 # Admin Command System
-Polished w/ AI.
+Polished writing the readme w/ AI.
 
 Built a custom admin panel for Collapse (CCRP) using [Cmdr](https://github.com/evaera/Cmdr), a Roblox commander framework.
 
