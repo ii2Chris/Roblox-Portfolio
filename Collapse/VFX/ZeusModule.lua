@@ -16,6 +16,9 @@
     1. WindUp (~0-3.4s) — ground charge particles
     2. Storm (~3.4-6.9s) — lightning storm overhead  
     3. Blast (~6.9-11s) — explosion and afterwind meshes
+
+	Reminder: Originally, this wasn't my code. It was an emitter script given to me, to play out the VFX and meshes, but I had to reconfigure, and--
+	readd the broken meshes, particles, modules, myself.
 ]]
 
 local Sequence = {}
