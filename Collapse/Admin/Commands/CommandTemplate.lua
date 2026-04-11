@@ -1,5 +1,5 @@
 --[[
-    Command Template - Blueprint for all Zeus admin commands.
+    Command Template - Blueprint for all admin commands.
     
     All commands follow this pattern:
     - Server logic is guarded by RunService:IsServer()
