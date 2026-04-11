@@ -29,9 +29,9 @@ Ongoing work across multiple GUI reworks, move remakes, and command updates to m
 ## What I Learned
 - Client-server architecture and how Roblox replicates data between them
 - Remote communication patterns (RemoteEvent, RemoteFunction, CompleteBridge)
-
-If you wish to contact me, please dm copy2 on discord.
 - Working within and extending large pre-existing codebases
 - VFX scripting — particle emitters, welds, mesh tweening, timing sequences
 - OOP patterns in Lua using metatables
 - Admin system design and permission management
+
+If you wish to contact me, please dm copy2 on discord.
