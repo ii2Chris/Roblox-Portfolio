@@ -23,6 +23,3 @@ Client clicks → Tool.Activated fires → Server Activated() → State checks (
 ## Example
 See `Zeus.lua` for a complete implementation — a mouse-aimed lightning ability that validates target position, enforces a 500 stud range limit, and fires VFX to the client via `CommunicationRemote`.
 
-## Video Showcase
-https://github.com/user-attachments/assets/2e75c8f5-f070-4412-aebc-ecb882797fb8
-
