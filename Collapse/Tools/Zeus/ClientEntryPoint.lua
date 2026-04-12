@@ -77,6 +77,11 @@ ToolConnectionRecord:AddConnection(Tool.AncestryChanged:Connect(function(_, pare
 end))
 ToolConnectionRecord:AddConnection(CommunicationRemote.OnClientEvent:Connect(function(type,...)
 	if type == "Cooldown" then
+		if CONNECTION then
+			CONNECTION:Disconnect()
+			CONNECTION= nil
+		end
+		
 		local args = {...}
 		local syncCD = args[1]
 		local syncNOW = GlobalTime()
@@ -85,41 +90,23 @@ ToolConnectionRecord:AddConnection(CommunicationRemote.OnClientEvent:Connect(fun
 		end
 		local durationLEFT = syncCD - syncNOW
 		local localTIME = os.clock() + durationLEFT
-		local CONNECTION; CONNECTION = RunService.Stepped:Connect(function()
+		CONNECTION = RunService.Stepped:Connect(function()
 			if Tool.Parent == nil then
 				CONNECTION:Disconnect()
 				Tool.Name = ToolName
+				CONNECTION = nil
 				return
 			end
 			local NOW = os.clock()
 			if NOW >= localTIME then
 				CONNECTION:Disconnect()
 				Tool.Name = ToolName
+				CONNECTION = nil
 				return
 			end
 			local ELAPSED = localTIME - NOW
 			Tool.Name = ToolName.." ["..string.format("%.1f", ELAPSED).."s]"
 		end)
-	end
-	if type == "Zeus" then
-		local Zeus = require(ReplicatedStorage.ReplicatedStorage_ACH_Package:WaitForChild("Assets").AbilityModules.ZeusModule)
-		local args = {...}
-		local hrp = args[1]
-		local mousePos = args[2]
-
-		local anchor = Instance.new("Part")
-		anchor.Size = Vector3.new(1,1,1)
-		anchor.Position = mousePos + Vector3.new(0, 2, 0) -- so the vfx will always play above ground
-		anchor.Anchored = true
-		anchor.CanCollide = false
-		anchor.CanQuery = false
-		anchor.CanTouch = false
-		anchor.Massless = true
-		anchor.Transparency = 1
-		anchor.Parent = workspace
-		game:GetService("Debris"):AddItem(anchor, 15)
-
-		Zeus.RunStompFx(nil, anchor, LocalPlayer, nil)
 	end
 	if type == "BeginAim" then
 		--[[
