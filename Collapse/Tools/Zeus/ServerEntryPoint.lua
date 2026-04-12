@@ -14,6 +14,12 @@ local RunService = SharedFramework.FetchService("RunService")
 local Players = SharedFramework.FetchService("Players")
 local PlayerGlobalStates = ReplicatedStorage:WaitForChild("PlayerGlobalStates")
 local StateManager = require(SharedFramework.FetchModule("StateManager"))
+local HitboxHelper = require(SharedFramework.FetchModule("HitboxHelper"))
+local ReplicatedStorage_ACH_Package = ReplicatedStorage:WaitForChild("ReplicatedStorage_ACH_Package")
+local Assets = ReplicatedStorage_ACH_Package:WaitForChild("Assets")
+local Remotes = ReplicatedStorage_ACH_Package:WaitForChild("Remotes")
+local ClientParticle = Remotes:WaitForChild("ClientParticle")
+local ServerClientHitbox = require(SharedFramework.FetchModule("ServerClientHitbox"))
 
 local Object = {}
 Object.__index = Object
@@ -153,7 +159,7 @@ function Object:Activated()
 	local clock = os.clock()
 	if not self.Cooldown:IsCooldownFinish(clock) then return end
 
-	local Cooldown = 15
+	local Cooldown = 25
 	self.Cooldown:SetCooldown(clock, Cooldown)
 	
 	local MouseTarget = nil
@@ -177,9 +183,159 @@ function Object:Activated()
 
 	local SyncCooldown = GlobalTime() + Cooldown
 	CommunicationRemote:FireClient(self.Player, "Cooldown", SyncCooldown)
-	CommunicationRemote:FireClient(self.Player, "Zeus", HumanoidRootPart, MouseTarget)
+	ClientParticle:FireAllClients("Zeus", HumanoidRootPart, MouseTarget)
 
 	StateObject:GlobalCooldownFor(4.38)
+	
+	local PlayerProfile = DataStore.GetProfile(self.Player)
+	local Damage = 15 + math.min(PlayerProfile:GetPsyche(), 300) * 0.16
+	local PillarDamage = 25 + math.min(PlayerProfile:GetPsyche(), 300) * 0.16
+	
+	local FlatHitbox1 = HitboxHelper.NewHelper(HitboxHelper.Enum.HitboxType.Space,  {
+		Anchored = true,
+		Size = Vector3.new(180, 10, 180),
+		CFrame = CFrame.new(MouseTarget)	
+	})
+	FlatHitbox1.Parent = SharedFramework.GetSharedData("IgnoredInstances")
+	game:GetService("Debris"):AddItem(FlatHitbox1, 3.4)
+	
+	local manualRelease
+	manualRelease = ServerClientHitbox.SpawnServerClientHitbox(
+		self.Player, 
+		HumanoidRootPart, 
+		50, 
+		FlatHitbox1, 
+		Vector3.new(), 
+		Vector3.new(1, 1, 1),
+		{
+			SharedFramework.GetSharedData("IgnoredInstances"),
+			Character,
+		},
+		1/10,
+		3.4,
+		180,
+		180,
+		true,
+		function (InstanceHit, TargetHumanoid, TargetHumanoidRootPart)
+			local TargetCharacter = TargetHumanoid.Parent
+			if not TargetCharacter then return end
+			local EnemeyStateObject = StateManager[TargetCharacter]
+			if not EnemeyStateObject then return end
+			if not EnemeyStateObject:MatchingHitFilter(self.StateObject) then return end
+			if EnemeyStateObject:IsInIFrame(os.clock()) then return end
+			if not EnemeyStateObject:CanBeHurtBy(self.Humanoid) then return end
+			
+			EnemeyStateObject:UniquePushSpeedReduction(0.4, 3.4, "ZeusPhase1")
+		end,
+		function()
+			FlatHitbox1:Destroy()
+		end,
+		ServerClientHitbox.PingFallbackHelper("default"),
+		function(InstanceHit, TargetHumanoid, TargetHumanoidPart)
+			return true
+		end,
+		1
+	)
+	
+	task.wait(3.4)
+	
+	local FlatHitbox2 = HitboxHelper.NewHelper(HitboxHelper.Enum.HitboxType.Space,  {
+		Anchored = true,
+		Size = Vector3.new(240, 10, 240),
+		CFrame = CFrame.new(MouseTarget)	
+	})
+	FlatHitbox2.Parent = SharedFramework.GetSharedData("IgnoredInstances")
+	game:GetService("Debris"):AddItem(FlatHitbox2, 8.6)
+
+	local manualRelease2
+	manualRelease = ServerClientHitbox.SpawnServerClientHitbox(
+		self.Player, 
+		HumanoidRootPart, 
+		50, 
+		FlatHitbox2, 
+		Vector3.new(), 
+		Vector3.new(1, 1, 1),
+		{
+			SharedFramework.GetSharedData("IgnoredInstances"),
+			Character,
+		},
+		1/10,
+		7.6,
+		180,
+		180,
+		true,
+		function (InstanceHit, TargetHumanoid, TargetHumanoidRootPart)
+			local TargetCharacter = TargetHumanoid.Parent
+			if not TargetCharacter then return end
+			local EnemeyStateObject = StateManager[TargetCharacter]
+			if not EnemeyStateObject then return end
+			if not EnemeyStateObject:MatchingHitFilter(self.StateObject) then return end
+			if EnemeyStateObject:IsInIFrame(os.clock()) then return end
+			if not EnemeyStateObject:CanBeHurtBy(self.Humanoid) then return end
+			
+			EnemeyStateObject:UniquePushSpeedReduction(0, 3.4, "ZeusPhase2")
+			TargetHumanoid:TakeDamage(Damage * 0.1)
+			EnemeyStateObject:FlagHurtBy(self.Player, PlayerProfile, self.StateObject, Character, Humanoid, HumanoidRootPart, Damage * 0.1, true)
+		end,
+		function()
+			FlatHitbox2:Destroy()
+		end,
+		ServerClientHitbox.PingFallbackHelper("default"),
+		function(InstanceHit, TargetHumanoid, TargetHumanoidPart)
+			return true
+		end,
+		1
+	)
+	
+	task.wait(3.5)
+	
+	local CylinderHitbox = HitboxHelper.NewHelper(HitboxHelper.Enum.HitboxType.Space,  {
+		Anchored = true,
+		Size = Vector3.new(90, 320, 90),
+		CFrame = CFrame.new(MouseTarget)	
+	})
+	CylinderHitbox.Parent = SharedFramework.GetSharedData("IgnoredInstances")
+	game:GetService("Debris"):AddItem(CylinderHitbox, 4.1)
+	
+	local manualRelease2
+	manualRelease = ServerClientHitbox.SpawnServerClientHitbox(
+		self.Player, 
+		HumanoidRootPart, 
+		50, 
+		CylinderHitbox, 
+		Vector3.new(), 
+		Vector3.new(1, 1, 1),
+		{
+			SharedFramework.GetSharedData("IgnoredInstances"),
+			Character,
+		},
+		1/10,
+		4.1,
+		180,
+		180,
+		true,
+		function (InstanceHit, TargetHumanoid, TargetHumanoidRootPart)
+			local TargetCharacter = TargetHumanoid.Parent
+			if not TargetCharacter then return end
+			local EnemeyStateObject = StateManager[TargetCharacter]
+			if not EnemeyStateObject then return end
+			if not EnemeyStateObject:MatchingHitFilter(self.StateObject) then return end
+			if EnemeyStateObject:IsInIFrame(os.clock()) then return end
+			if not EnemeyStateObject:CanBeHurtBy(self.Humanoid) then return end
+
+			EnemeyStateObject:UniquePushSpeedReduction(0, 3.4, "ZeusPhase3")
+			TargetHumanoid:TakeDamage(PillarDamage * 0.4)
+			EnemeyStateObject:FlagHurtBy(self.Player, PlayerProfile, self.StateObject, Character, Humanoid, HumanoidRootPart, Damage * 0.1, true)
+		end,
+		function()
+			CylinderHitbox:Destroy()
+		end,
+		ServerClientHitbox.PingFallbackHelper("default"),
+		function(InstanceHit, TargetHumanoid, TargetHumanoidPart)
+			return true
+		end,
+		1
+	)
 end
 
 function Object:Deactivated()
