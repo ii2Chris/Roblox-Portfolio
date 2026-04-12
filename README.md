@@ -1,6 +1,6 @@
 # Roblox Portfolio
 
-Hi, I'm Chris or Copy — a Roblox developer currently learning Lua/Luau through hands-on work on live games. Background in Python, focused on systems scripting, UI, and VFX.
+Hi, I'm Chris or Copy, I currently have about 1 MOE in roblox development. I have a Background in Python, focused on systems scripting, UI, and VFX.
 
 ## Timeline
 
