@@ -27,11 +27,9 @@ local Debris = game:GetService("Debris")
 local RunService = game:GetService("RunService")
 local CurrentCamera = workspace.CurrentCamera
 local TweenService = game:GetService("TweenService")
-local ContentProvider = game:GetService("ContentProvider")
-local Lightning = game:GetService("Lighting")
 
 local Assets = script.Parent.Parent.Particles.ZEUSParticles.Assets
-local Animations = Assets.Animations
+-- local Animations = Assets.Animations
 local Sounds = Assets.Sounds
 local VFX = Assets.VFX
 local Modules = Assets.Modules
@@ -44,83 +42,31 @@ local EF_Settings = {
 local ZephsUtilsFolder = Modules.ZephsUtils
 
 local ZephsCameraEffects = require(ZephsUtilsFolder.ZephsCamEffects)
-local HandmadeModule = require(ZephsUtilsFolder.ZephsCamEffects.Handmade)
-local ZephsUtils = require(ZephsUtilsFolder.ZephsFunctions)
 local AllModules = require(ZephsUtilsFolder.AllModules)
-
 local ShakeCamera = require(Modules.ShakeCamera)
-local ThugShakur = require(Modules.CameraShaker)
-local Crater = require(Modules.Crater)
-local RockModule = require(Modules.RocksModule)
-local FloatRocks = require(Modules.FloatRocks)
-local EffectModule = require(Modules.Utils.EffectModule)
--- local LightningController = require(Modules.LightingController)
-local CameraShaker = require(Modules.CameraShaker)
-
-local Utility = require(Modules.Utils.Utility)
-local GuiShaker = require(Modules.Utils.Utility.GuiShakerModule)
-
+local Assistance = require(Modules.Assistance)
 local OriginalFov = CurrentCamera.FieldOfView
 
-local foundAtmosphere = game.Lighting:FindFirstChildOfClass("DefaultAtmosphere")
-
-local LightingSettings = {
-	["Brightness"] = game.Lighting.Brightness ;
-	["Ambient"] = game.Lighting.Ambient ;
-	["ColorShift_Bottom"] = game.Lighting.ColorShift_Bottom ;
-	["ColorShift_Top"] = game.Lighting.ColorShift_Top ;
-	["OutdoorAmbient"] = game.Lighting.OutdoorAmbient ;
-	["ClockTime"] = game.Lighting.ClockTime ;
-}
-
-local AtmosphereSettings = foundAtmosphere and {
-	["Density"] = foundAtmosphere.Density,
-	["Offset"] = foundAtmosphere.Offset,
-	["Glare"] = foundAtmosphere.Glare,
-	["Haze"] = foundAtmosphere.Haze,
-	["Color"] = foundAtmosphere.Color,
-	["Decay"] = foundAtmosphere.Decay,
-} or {}
-
-local foundBloom = game.Lighting:FindFirstChildOfClass("BloomEffect")
-local BloomSettings = foundBloom and {
-	["Intensity"] = foundBloom.Intensity,
-	["Size"] = foundBloom.Size,
-	["Threshold"] = foundBloom.Threshold,
-} or {}
-
-local foundColorCorrection = game.Lighting:FindFirstChildOfClass("ColorCorrectionEffect")
-local ColorCorrectionSettings = foundColorCorrection and {
-	["Brightness"] = foundColorCorrection.Brightness,
-	["Contrast"] = foundColorCorrection.Contrast,
-	["Saturation"] = foundColorCorrection.Saturation,
-	["TintColor"] = foundColorCorrection.TintColor,
-} or {}
-
-local BlurSize = game.Lighting.Blur.Size
+local TWEEN_0_5  = TweenInfo.new(0.5)
+local TWEEN_1   = TweenInfo.new(1)
+local TWEEN_1_5 = TweenInfo.new(1.5)
+local TWEEN_2   = TweenInfo.new(2)
 
 Sequence.RunStompFx = function(p1, p2, p3, p4)
-	local isNearEffect = (p3.Character.Torso.Position - p2.Position).Magnitude <= 100
-
-	for _, v in pairs(EF_Settings.EffectFolderDirectory:GetDescendants()) do
-		if v.Name == EF_Settings.EffectFolderName then return end
-	end
+	if not p3.Character or not p3.Character:FindFirstChild("Torso") then return end
+	local isNearEffect = (p3.Character.Torso.Position - p2.Position).Magnitude <= 200
 
 	local Folder = Instance.new("Folder", EF_Settings.EffectFolderDirectory)
 	Folder.Name = EF_Settings.EffectFolderName
 	Debris:AddItem(Folder, 20)
-
-	local PlayerTorso = p3.Character:WaitForChild("Torso")
+	
+	local fxcc = nil
 	local PlayerCFrame = CFrame.new(p2.Position)
 
 	local SFX = Sounds.SFX:Clone()
 	SFX.Parent = Folder
 	SFX.PlayOnRemove = true
 	SFX:Destroy()
-
-	-- task.spawn(function()
-		-- TweenService:Create(game.Lighting, TweenInfo.new(1), {ClockTime = 0}):Play()
-	-- end)
 
 	task.wait(0.3)
 
@@ -132,7 +78,7 @@ Sequence.RunStompFx = function(p1, p2, p3, p4)
 		local Start = VFX.Start:Clone()
 		Start.Parent = Folder
 		Start.CFrame = PlayerCFrame * CFrame.new(0, -2, 0)
-		for _, v in pairs(Start:GetDescendants()) do
+		for _, v in ipairs(Start:GetDescendants()) do
 			if v:IsA("ParticleEmitter") then
 				v:Emit(v:GetAttribute("EmitCount"))
 			end
@@ -150,13 +96,13 @@ Sequence.RunStompFx = function(p1, p2, p3, p4)
 	WindUp:SetPrimaryPartCFrame(PlayerCFrame * CFrame.new(0, -2.7, 0))
 	WindUp.Parent = Folder
 
-	for _, v in pairs(WindUp.Charge.Ground:GetDescendants()) do
+	for _, v in ipairs(WindUp.Charge.Ground:GetDescendants()) do
 		if v:IsA("ParticleEmitter") then
 			v.Enabled = true
 		end
 	end
 
-	for _, v in pairs(WindUp.LongSpecs:GetDescendants()) do
+	for _, v in ipairs(WindUp.LongSpecs:GetDescendants()) do
 		if v:IsA("ParticleEmitter") then
 			v.Enabled = true
 		end
@@ -180,32 +126,32 @@ Sequence.RunStompFx = function(p1, p2, p3, p4)
 		end			
 	end)
 
-	for _, v in pairs(WindUp.Charge.Emit:GetDescendants()) do
+	for _, v in ipairs(WindUp.Charge.Emit:GetDescendants()) do
 		if v:IsA("ParticleEmitter") then
 			v:Emit(v:GetAttribute("EmitCount"))
 		end
 	end
-
+	
 	task.spawn(function()
 		local WindUpMesh = VFX.WindUpEmitWind:Clone()
 		WindUpMesh.PrimaryPart = WindUpMesh:FindFirstChildWhichIsA("BasePart", true)
 		WindUpMesh:SetPrimaryPartCFrame(PlayerCFrame * CFrame.new(0, 3, 0))
 		WindUpMesh.Parent = Folder
 
-		TweenService:Create(WindUpMesh.Wind, TweenInfo.new(2), {Size = WindUpMesh.Wind.Size * 2.5, Orientation = WindUpMesh.Wind.Orientation + Vector3.new(0, 360, 0)}):Play()
-		TweenService:Create(WindUpMesh.Wind, TweenInfo.new(1.5), {Transparency = 1}):Play()
-		TweenService:Create(WindUpMesh.Wind2, TweenInfo.new(2), {Size = WindUpMesh.Wind2.Size * 3.5, Orientation = WindUpMesh.Wind2.Orientation + Vector3.new(0, 360, 0)}):Play()
-		TweenService:Create(WindUpMesh.Wind2, TweenInfo.new(1.5), {Transparency = 1}):Play()
+		TweenService:Create(WindUpMesh.Wind, TWEEN_2, {Size = WindUpMesh.Wind.Size * 2.5, Orientation = WindUpMesh.Wind.Orientation + Vector3.new(0, 360, 0)}):Play()
+		TweenService:Create(WindUpMesh.Wind, TWEEN_1_5, {Transparency = 1}):Play()
+		TweenService:Create(WindUpMesh.Wind2, TWEEN_2, {Size = WindUpMesh.Wind2.Size * 3.5, Orientation = WindUpMesh.Wind2.Orientation + Vector3.new(0, 360, 0)}):Play()
+		TweenService:Create(WindUpMesh.Wind2, TWEEN_1_5, {Transparency = 1}):Play()
 	end)
 
-	for i, v in pairs(WindUp.Soon:GetDescendants()) do
+	for i, v in ipairs(WindUp.Soon:GetDescendants()) do
 		if v:IsA("ParticleEmitter") then
 			v.Parent = WindUp.Charge
 		end
 	end
 
 	local Charge = VFX.Charge:Clone()
-	for _, v in pairs(Charge:GetDescendants()) do
+	for _, v in ipairs(Charge:GetDescendants()) do
 		if v:IsA("ParticleEmitter") and v.Name ~= "Charging" then
 			v.Enabled = true
 		end
@@ -214,26 +160,24 @@ Sequence.RunStompFx = function(p1, p2, p3, p4)
 	Charge.Parent = Folder
 
 	task.delay(0.3, function()
-		if WindUp then
-			WindUp:Destroy()
-		end
+		WindUp:Destroy()
 	end)
 
 	task.wait(2)
 
-	for _, v in pairs(Storm.Storm.MainFX:GetDescendants()) do
+	for _, v in ipairs(Storm.Storm.MainFX:GetDescendants()) do
 		if v:IsA("ParticleEmitter") then
 			v.Enabled = true
 		end
 	end
 	
-	for _, v in pairs(Storm.Storm.MainWind:GetDescendants()) do
+	for _, v in ipairs(Storm.Storm.MainWind:GetDescendants()) do
 		if v:IsA("ParticleEmitter") then
 			v.Enabled = true
 		end
 	end
 
-	for _, v in pairs(Storm.Storm.SecondLayer:GetDescendants()) do
+	for _, v in ipairs(Storm.Storm.SecondLayer:GetDescendants()) do
 		if v:IsA("ParticleEmitter") then
 			v.Enabled = true
 		end
@@ -248,7 +192,7 @@ Sequence.RunStompFx = function(p1, p2, p3, p4)
 	if isNearEffect then
 		task.spawn(function()
 			local ScreenBurst = VFX.ScreenBurst:Clone()
-			ScreenBurst.Parent = workspace.IgnoredInstances
+			ScreenBurst.Parent = Folder
 			for _, v in ipairs(ScreenBurst:GetDescendants()) do
 				if v:IsA("ParticleEmitter") then
 					v:Emit(v:GetAttribute("EmitCount") or 10)
@@ -290,61 +234,62 @@ Sequence.RunStompFx = function(p1, p2, p3, p4)
 		WM:SetPrimaryPartCFrame(PlayerCFrame * CFrame.new(0, 3, 0))
 		WM.Parent = Folder
 
-		task.spawn(require(Modules.Assistance), WM)
+		task.spawn(Assistance, WM)
 
-		TweenService:Create(WM.Endish, TweenInfo.new(1.5), {Orientation = WM.Endish.Orientation + Vector3.new(0, 500, 0)}):Play()
-		TweenService:Create(WM.Endish.Mesh, TweenInfo.new(1.5), {Scale = Vector3.new(WM.Endish.Mesh.Scale.X * 4.5, WM.Endish.Mesh.Scale.Y * 4.5, WM.Endish.Mesh.Scale.Z * 4.5)}):Play()
-		TweenService:Create(WM.Endish.Decal, TweenInfo.new(1), {Transparency = 1}):Play()
+		TweenService:Create(WM.Endish, TWEEN_1_5, {Orientation = WM.Endish.Orientation + Vector3.new(0, 500, 0)}):Play()
+		TweenService:Create(WM.Endish.Mesh, TWEEN_1_5, {Scale = Vector3.new(WM.Endish.Mesh.Scale.X * 4.5, WM.Endish.Mesh.Scale.Y * 4.5, WM.Endish.Mesh.Scale.Z * 4.5)}):Play()
+		TweenService:Create(WM.Endish.Decal, TWEEN_2, {Transparency = 1}):Play()
 
-		TweenService:Create(WM.Startish, TweenInfo.new(1), {Orientation = WM.Startish.Orientation + Vector3.new(0, 500, 0)}):Play()
-		TweenService:Create(WM.Startish.Mesh, TweenInfo.new(1), {Scale = WM.Startish.Mesh.Scale * 4}):Play()
-		TweenService:Create(WM.Startish.Decal, TweenInfo.new(0.5), {Transparency = 1}):Play()
+		TweenService:Create(WM.Startish, TWEEN_1, {Orientation = WM.Startish.Orientation + Vector3.new(0, 500, 0)}):Play()
+		TweenService:Create(WM.Startish.Mesh, TWEEN_1, {Scale = WM.Startish.Mesh.Scale * 4}):Play()
+		TweenService:Create(WM.Startish.Decal, TWEEN_0_5, {Transparency = 1}):Play()
 
-		TweenService:Create(WM.WindMeshPart, TweenInfo.new(2), {Orientation = WM.WindMeshPart.Orientation + Vector3.new(0, 700, 0)}):Play()
-		TweenService:Create(WM.WindMeshPart.Mesh, TweenInfo.new(2), {Scale = Vector3.new(WM.WindMeshPart.Mesh.Scale.X * 5, WM.WindMeshPart.Mesh.Scale.Y * 1.5, WM.WindMeshPart.Mesh.Scale.Z * 5)}):Play()
-		TweenService:Create(WM.WindMeshPart.Decal, TweenInfo.new(1.5), {Transparency = 1}):Play()
+		TweenService:Create(WM.WindMeshPart, TWEEN_2, {Orientation = WM.WindMeshPart.Orientation + Vector3.new(0, 700, 0)}):Play()
+		TweenService:Create(WM.WindMeshPart.Mesh, TWEEN_2, {Scale = Vector3.new(WM.WindMeshPart.Mesh.Scale.X * 5, WM.WindMeshPart.Mesh.Scale.Y * 1.5, WM.WindMeshPart.Mesh.Scale.Z * 5)}):Play()
+		TweenService:Create(WM.WindMeshPart.Decal, TWEEN_1_5, {Transparency = 1}):Play()
 	end)
 	
-	for _, v in pairs(Charge:GetDescendants()) do
+	for _, v in ipairs(Charge:GetDescendants()) do
 		if v:IsA("ParticleEmitter") and v.Name == "Charging" then
 			v.Enabled = true
 		end
 	end
 	
-	for _, v in pairs(Blast:GetDescendants()) do
+	for _, v in ipairs(Blast:GetDescendants()) do
 		if v:IsA("ParticleEmitter") then
 			if v:GetAttribute("EmitDelay") then
 				task.delay(v:GetAttribute("EmitDelay"), function()
-					v:Emit(v:GetAttribute("EmitCount"))
+					v:Emit(v:GetAttribute("EmitCount") or 0)
 				end)
 			else
-				v:Emit(v:GetAttribute("EmitCount"))
+				v:Emit(v:GetAttribute("EmitCount") or 0)
 			end
 		end
 	end
 
-	for _, v in pairs(Storm.Charge:GetDescendants()) do
+	for _, v in ipairs(Storm.Charge:GetDescendants()) do
 		if v:IsA("ParticleEmitter") then
 			v.Enabled = true
 		end
 	end
 
-	for _, v in pairs(Storm.CounterShock:GetDescendants()) do
+	for _, v in ipairs(Storm.CounterShock:GetDescendants()) do
 		if v:IsA("ParticleEmitter") then
 			v.Enabled = true
 		end
 	end
-
+	
+	
 	if isNearEffect then
-		local fxcc = VFX.fxcc:Clone()
+		fxcc = VFX.fxcc:Clone()
 		fxcc.Parent = game.Lighting
-		Debris:AddItem(fxcc, 5)
-		TweenService:Create(fxcc, TweenInfo.new(0.5), {Brightness = -.08, Contrast = .1}):Play()
+		Debris:AddItem(fxcc, 10)
+		TweenService:Create(fxcc, TWEEN_0_5, {Brightness = -.08, Contrast = .1}):Play()
 	end
 
 	task.wait(1)
 
-	for _, v in pairs(Storm.Storm:GetDescendants()) do
+	for _, v in ipairs(Storm.Storm:GetDescendants()) do
 		if v:IsDescendantOf(Storm.Storm.MainWind) or v:IsDescendantOf(Storm.Storm.SecondLayer) then
 			if v:IsA("ParticleEmitter") then
 				v.TimeScale = 1
@@ -359,10 +304,9 @@ Sequence.RunStompFx = function(p1, p2, p3, p4)
 		ZephsCameraEffects.FOV(OriginalFov, .7)
 		ZephsCameraEffects.Flash(2)
 		ShakeCamera.ShakeCamera(3, 45, .2, 1.1)
-		-- TweenService:Create(game.Lighting, TweenInfo.new(1), {ClockTime = LightingSettings.ClockTime}):Play()
 	end
 
-	for _, v in pairs(Folder:GetDescendants()) do
+	for _, v in ipairs(Folder:GetDescendants()) do
 		if v:IsA("ParticleEmitter") then
 			v.Rate = v.Rate / 15
 		end
@@ -370,13 +314,11 @@ Sequence.RunStompFx = function(p1, p2, p3, p4)
 
 	task.wait(0.2)
 
-	if isNearEffect then
-		if game.Lighting:FindFirstChild("fxcc") then
-			TweenService:Create(game.Lighting:FindFirstChild("fxcc"), TweenInfo.new(1), {Brightness = 0, Saturation = 0, Contrast = 0}):Play()
-		end
+	if isNearEffect and fxcc and fxcc.Parent then
+		TweenService:Create(fxcc, TWEEN_1, {Brightness = 0, Saturation = 0, Contrast = 0}):Play()
 	end
 
-	for _, v in pairs(Folder:GetDescendants()) do
+	for _, v in ipairs(Folder:GetDescendants()) do
 		if v:IsA("ParticleEmitter") or v:IsA("Beam") or v:IsA("PointLight") then
 			v.Enabled = false
 		end
