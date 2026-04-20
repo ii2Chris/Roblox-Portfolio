@@ -1,7 +1,7 @@
 # Collapse (CCRP)
 
 **Role:** Full-Stack Scripter  
-**Period:** February 2026 — Present  
+**Period:** March 2026 — Present  
 **Status:** Active 🟩
 
 Collapse was my first professional Roblox project and my introduction to Lua/Luau scripting. Coming in with a background in basic Python, I had to quickly learn not just the language but how a large, interconnected Roblox codebase is structured — client-server architecture, remote communication, replication, and working within established systems rather than building from scratch.
