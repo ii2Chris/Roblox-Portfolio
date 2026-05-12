@@ -1,5 +1,6 @@
 --[[
-  This should exist in wherver the use can chat, so if they say !help, ;help, or /help, the message can be send and create as a help gui
+  This should exist in where-ever user's use can chat. It's typically within one big server script, or, that's how Collapse did it,
+  so if they say !help, ;help, or /help, the message can be send and create as a help gui
 ]]
 
 -- help command, send to the HelpGUI which is enabled through showhelp cmdr command
